@@ -1,0 +1,33 @@
+name: Dev Environment
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+  workflow_dispatch:
+jobs:
+    TestDataQuality:
+      if: github.ref == 'refs/heads/setup'
+      runs-on: ubuntu-latest
+      steps:
+
+        - id: CheckOutSourceCode
+          name: Checkout Source Code
+          uses: actions/checkout@v3
+        
+        - id: InstallPackages
+          name: Install Packages
+          run: |
+            echo "Hello World"
+    
+    DevPR:
+      if: github.event_name == 'pull_request'
+      runs-on: ubuntu-latest
+      steps:
+
+        - id: CheckOutRepository
+          name: Check Out Repository
+          run: |
+            echo Hello World
