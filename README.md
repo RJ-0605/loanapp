@@ -36,3 +36,8 @@ AWS_REGION: "us-east-1" # Provide region or leave it as default.
 * Initialize your directory, commit and push the sources code to main branch
 
 **Note:** If you won't to delete all resources, change the value of `ACTION='destroy'`, commit and push to the setup branch to destroy all resources.
+
+
+user --> setup --> main
+
+user --> dev --> main --> stage --> prod

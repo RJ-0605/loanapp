@@ -9,7 +9,8 @@ on:
 
 env:
 
-    ACTION: "destroy"
+    # Define environment variables
+    ACTION: "apply"
     S3_VERSION: "Enabled"
     AWS_REGION: "us-east-1"
     S3_DATABASE_STORAGE: "database"
