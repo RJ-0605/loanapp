@@ -10,7 +10,7 @@ on:
 env:
 
     # Define environment variables
-    ACTION: "destroy"
+    ACTION: "apply"
     S3_VERSION: "Enabled"
     AWS_REGION: "us-east-1"
     S3_DATABASE_STORAGE: "database"
@@ -123,7 +123,49 @@ jobs:
             -var="s3-storage=[\"${{ env.S3_DATABASE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID }}\", \"${{ env.S3_DATALAKE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID }}\", \"${{ env.S3_DATAWAREHOUSE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID }}\"]"
       
             echo "Infrastructure deployed successfully."
+            
+        - id: "DeleteDatabaseVersions"
+          if: env.ACTION == 'destroy'
+          name: Destroy s3 bucket to be used for Database
+          run: |
+            echo "Start Deleting Storage Bucket"
+            versions=$(aws s3api list-object-versions --bucket "${{ env.S3_DATABASE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID}}" --output json)
+            keys=$(echo "$versions" | grep -o '"Key": "[^"]*' | sed 's/"Key": "//')
+            versions=$(echo "$versions" | grep -o '"VersionId": "[^"]*' | sed 's/"VersionId": "//')
+            for key in $keys; do
+              for version in $versions; do
+                aws s3api delete-object --bucket "${{ env.S3_DATABASE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID}}" --key "$key" --version-id "$version"
+              done
+            done  
 
+        - id: "DeleteWarehouseVersions"
+          if: env.ACTION == 'destroy'
+          name: Destroy s3 bucket to be used for Data Warehouse
+          run: |
+            echo "Start Deleting Storage Bucket"
+            versions=$(aws s3api list-object-versions --bucket "${{ env.S3_DATAWAREHOUSE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID}}" --output json)
+            keys=$(echo "$versions" | grep -o '"Key": "[^"]*' | sed 's/"Key": "//')
+            versions=$(echo "$versions" | grep -o '"VersionId": "[^"]*' | sed 's/"VersionId": "//')
+            for key in $keys; do
+              for version in $versions; do
+                aws s3api delete-object --bucket "${{ env.S3_DATAWAREHOUSE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID}}" --key "$key" --version-id "$version"
+              done
+            done  
+
+        - id: "DeleteDataLakeVersions"
+          if: env.ACTION == 'destroy'
+          name: Destroy s3 bucket to be used for Data Lake
+          run: |
+            echo "Start Deleting Storage Bucket"
+            versions=$(aws s3api list-object-versions --bucket "${{ env.S3_DATALAKE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID}}" --output json)
+            keys=$(echo "$versions" | grep -o '"Key": "[^"]*' | sed 's/"Key": "//')
+            versions=$(echo "$versions" | grep -o '"VersionId": "[^"]*' | sed 's/"VersionId": "//')
+            for key in $keys; do
+              for version in $versions; do
+                aws s3api delete-object --bucket "${{ env.S3_DATALAKE_STORAGE }}-${{ env.AWS_REGION }}-${{ secrets.YOUR_AWS_ACCOUNT_ID}}" --key "$key" --version-id "$version"
+              done
+            done  
+  
         - id: "TerraformDestroy"
           if: env.ACTION == 'destroy'
           name: Destroy resources using terraform
