@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 jobs:
     TestDataQuality:
-      if: github.ref == 'refs/heads/setup'
+      if: github.ref == 'refs/heads/dev'
       runs-on: ubuntu-latest
       steps:
 
